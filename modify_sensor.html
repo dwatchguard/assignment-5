@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lab 5</title>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script type="text/javascript">
+function updateValues(){
+    test = new XMLHttpRequest();
+    test.onreadystatechange = function() {
+        if(this.readyState == 4) {
+            values = JSON.parse(this.responseText);
+            document.getElementById("SMS").innerHTML = "Current SMS: " + values.SMS;
+            document.getElementById("name").innerHTML = "Current name: " + values.name;
+            document.getElementById("location").innerHTML = "Current location: " + values.location;
+            document.getElementById("threshold").innerHTML = "Current threshold: " + values.threshold;
+        }
+    }
+    test.open("GET", "http://ec2-18-223-119-253.us-east-2.compute.amazonaws.com:8080/sky/cloud/W6e89g9KfB3TnJiBXGzGgU/sensor_profile/get_all", true);
+    test.send();
+}
+</script>
+</head>
+<script>
+function httpPost() {
+  var thresh_value = document.forms["myForm"]["threshold"].value;
+  var txt = "http://ec2-18-223-119-253.us-east-2.compute.amazonaws.com:8080/sky/event/W6e89g9KfB3TnJiBXGzGgU/314/sensor/profile_updated";
+  txt += "?name=" + document.forms["myForm"]["name"].value;
+  txt += "&location=" + document.forms["myForm"]["location"].value;
+  if (thresh_value > 0) {
+    txt += "&threshold=" + thresh_value;
+  }
+  if (document.forms["myForm"]["SMS"].value > 0) {
+    txt += "&SMS=" + document.forms["myForm"]["SMS"].value;
+  }
+  console.log(txt);
+  var test = new XMLHttpRequest();
+  test.open("GET",txt, true);
+  test.send();
+}
+</script>
+<body onload = "updateValues()">
+    <h4 id="name"> </h4>
+    <h4 id="location"> </h4>
+    <h4 id="threshold"> </h4>
+    <h4 id="SMS"> </h4>
+    <p> Click <a href="http://ec2-3-16-215-80.us-east-2.compute.amazonaws.com/">here</a> to return home. </p>
+    <form name = "myForm" onsubmit = "httpPost()" method = "POST">
+  Sensor Name:<br>
+  <input type="text" name="name" required><br>
+  Sensor Location:<br>
+  <input type="text" name="location" required><br>
+  Threshold Temperature (F):<br>
+  <input type="number" name="threshold"><br>
+  SMS Number:<br>
+  <input type="number" name="SMS"><br>
+  <input type="submit" value="Submit">
+  
+  
+</form>
+</body>
+</html>                            
