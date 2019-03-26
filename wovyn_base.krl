@@ -1,16 +1,14 @@
 ruleset wovyn_base {
   meta {
+        use module sensor_profile
         use module lesson_keys
         use module twilio alias twilio
         with account_sid = keys:twilio{"account_sid"}
         auth_token =  keys:twilio{"auth_token"}
   }
-  global {
-    temperature_threshold = 75;
-  }
 
  rule process_heartbeat {
-    select when wovyn heartbeat where event:attr("genericThing") 
+    select when wovyn heartbeat where event:attr("genericThing") != null
     send_directive("wovyn", {"body" : "Heartbeat Received"});
     fired {
         raise wovyn event "new_temperature_reading" attributes { "temperature": event:attr("genericThing").get(["data", "temperature", 0, "temperatureF"]), "timestamp": time:now()};
@@ -20,7 +18,7 @@ ruleset wovyn_base {
     select when wovyn new_temperature_reading
     pre {
     temp = event:attr("temperature");
-    violation = event:attr("temperature") > temperature_threshold;
+    violation = event:attr("temperature") > sensor_profile:get_threshold();
     
     }
     send_directive("violation", {"vio": violation, "temp" : temp});
@@ -30,6 +28,6 @@ ruleset wovyn_base {
   }
  rule threshold_notification {
     select when wovyn threshold_violation
-    twilio:send_sms("14433709548", "16677712304", "There was a violation");
+    twilio:send_sms(sensor_profile:get_SMS().as("String"), "16677712304", "There was a violation");
  } 
 }
