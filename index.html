@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lab 5</title>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script type="text/javascript">
+var myVar;    
+function updateValues(){
+    var temp_table = [];
+    test = new XMLHttpRequest();
+    test.onreadystatechange = function() {   
+    	if(this.readyState == 4) {
+	    test_table = JSON.parse(this.responseText);
+            $("#curr_temp").html("Current Temperature: " + test_table[test_table.length-1].temperature + "F");
+             var txt = "<table border='1'>"
+             txt += "<tr>  <th>Temperature (F)</th></tr>"; 
+             temp_table = test_table.reverse();
+             temp_table.length = Math.min(temp_table.length, 10);
+             for (x in test_table) {
+                 txt += "<tr><td>" + test_table[x].temperature + "</td></tr>";
+             }
+             txt += "</table>"    
+             document.getElementById("rec_temps").innerHTML = txt;	
+	}
+    }
+
+    test.open("GET", "http://ec2-18-223-119-253.us-east-2.compute.amazonaws.com:8080/sky/cloud/W6e89g9KfB3TnJiBXGzGgU/temperature_store/temperatures/", true);
+    test.send();
+    var temp_table = [];
+	var d = new Date();
+    var t = d.toLocaleTimeString();
+    vio = new XMLHttpRequest();
+    vio.onreadystatechange = function() {   
+    	if(this.readyState == 4) {
+	    vio_table = JSON.parse(this.responseText);
+             var txt = "<table border='1'>";
+             txt += "<colgroup>";
+             txt += "<col span = \"2\">";
+             txt += "</colgroup>";
+             txt += "<tr>  <th>Temperature(F)</th> <th> Timestamp </th </tr>"
+             for (x in vio_table) {
+                 txt += "<tr><td>" + vio_table[x].temperature + "</td><td>" + vio_table[x].timestamp +  "</td></tr>";
+             }
+             txt += "</table>"    
+             document.getElementById("vio_temps").innerHTML = txt;	
+	}
+    }
+
+    vio.open("GET", "http://ec2-18-223-119-253.us-east-2.compute.amazonaws.com:8080/sky/cloud/W6e89g9KfB3TnJiBXGzGgU/temperature_store/threshold_violations/", true);
+    vio.send();
+}
+$(document).ready(function(){
+    myVar = setInterval("updateValues()", 1000);
+});
+</script>
+</head>
+<body onload = "updateValues()">
+    <h4 id="curr_temp"> </h4>
+    <p> Click <a href="http://ec2-3-16-215-80.us-east-2.compute.amazonaws.com/modify_sensor.html">here</a> to modify the sensor. </p>
+    <h4> Recent Temperatures: </h4>
+    <p id = "rec_temps"> </p>
+    <h4> All Violations: </h4>
+    <p id = "vio_temps"> </p>
+</body>
+</html>                            
